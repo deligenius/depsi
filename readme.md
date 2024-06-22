@@ -8,20 +8,21 @@
 ![NPM](https://img.shields.io/npm/l/depsi)
 ![GitHub Repo stars](https://img.shields.io/github/stars/deligenius/depsi?style=social)
 
-`depsi` is a dependency injection library for Node.js, designed to work seamlessly with Express.js, TypeScript or JavaScript. 
+`depsi` is a dependency injection library for Node.js, designed to work seamlessly with Express.js, TypeScript or JavaScript.
 
-* Progressive DI(Dependency injection) framework for Express.js
-* Super lightweight - 5 kb, or 12.7 kb unpacked
-* Supports ESM module.
-* Support both of TypeScript and JavaScript 
+- Progressive DI(Dependency injection) framework for Express.js
+- Super lightweight - 5 kb, or 12.7 kb unpacked
+- Supports ESM module.
+- Support both of TypeScript and JavaScript
 
 ## Table of content
+
 - [Quick Start](#quick-start)
 - [API Usage](#api-usage)
   - [Module](#module)
   - [Injectable](#injectable)
-  - [Router](#router)
   - [Depends](#depends)
+  - [Router](#router)
 - [Advanced Topics](#advanced-topics)
   - [Nested Modules](#nested-modules)
   - [Dynamic Modules](#dynamic-modules)
@@ -146,21 +147,17 @@ export class Logger {
 }
 ```
 
-## Router
+### Inject class into other class
 
-Routers are used to define routes within a module.
+```ts
+@Injectable()
+export class Service {
+  constructor(private logger: Logger) {}
 
-### Creating a Router
-
-```typescript
-import { createRouter, Depends } from "depsi";
-import { Logger } from "./app.service.js";
-
-export const appRouter = createRouter("/");
-
-appRouter.get("/hi", (req, res) => {
-  res.send("hi");
-});
+  execute() {
+    this.logger.log("Service is executing...");
+  }
+}
 ```
 
 ## Depends
@@ -178,6 +175,23 @@ const appRouter = createRouter("/");
 appRouter.get("/test", (req, res, next, logger = Depends(Logger)) => {
   logger.log("log from /test");
   res.send("hello world from /test");
+});
+```
+
+## Router
+
+Routers are used to define routes within a module.
+
+### Creating a Router
+
+```typescript
+import { createRouter, Depends } from "depsi";
+import { Logger } from "./app.service.js";
+
+export const appRouter = createRouter("/");
+
+appRouter.get("/hi", (req, res) => {
+  res.send("hi");
 });
 ```
 
@@ -228,9 +242,9 @@ class MyClass {
 export const myModule = new Module({
   imports: [
     new DynamicModule({
-        token: MyClass.TOKEN,
-        provider: async () => new MyClass(),
-      }),
+      token: MyClass.TOKEN,
+      provider: async () => new MyClass(),
+    }),
   ],
   routes: [],
   providers: [],
@@ -239,19 +253,10 @@ export const myModule = new Module({
 // use it by like this:
 import { Depends } from "depsi";
 
-router.get(
-  "/",
-  (
-    req,
-    res,
-    next,
-    myclass: MyClass = Depends(MyClass.TOKEN)
-  ) => {
-    myclass.test();
-    res.send("Test route");
-  }
-);
-
+router.get("/", (req, res, next, myclass: MyClass = Depends(MyClass.TOKEN)) => {
+  myclass.test();
+  res.send("Test route");
+});
 ```
 
 ## JavaScript: JSDoc `@param` for Dependency Injection in class constructor
@@ -297,7 +302,6 @@ testRouter.get(
   }
 );
 ```
-
 
 # Credits
 
