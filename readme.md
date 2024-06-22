@@ -201,7 +201,6 @@ Dynamic modules allow you to provide dynamic providers that can be asynchronousl
 ### Creating and using a Dynamic Module
 
 ```typescript
-Copy code
 import { Module, DynamicModule } from "depsi";
 
 class MyClass {
@@ -225,7 +224,7 @@ export const myModule = new Module({
 });
 
 // use it by like this:
-const { Depends } = require("depsi");
+import { Depends } from "depsi";
 
 router.get(
   "/",
