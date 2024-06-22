@@ -160,6 +160,18 @@ export class Service {
 }
 ```
 
+### Register providers in a module
+The order of providers matters, `depsi` register providers from left to right.
+
+```ts
+export const appModule = new Module({
+  imports: [],
+  providers: [Logger, Service],
+  routes: [],
+});
+```
+
+
 ## Depends
 
 The Depends function is used to inject dependencies into route handlers.
