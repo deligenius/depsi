@@ -21,7 +21,7 @@
   "author": "Jun Guo",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/delegenius/di.git"
+    "url": "git+https://github.com/delegenius/depsi.git"
   },
   "license": "MIT",
   "peerDependencies": {
