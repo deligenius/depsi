@@ -179,13 +179,13 @@ import { appRouter } from "./app.router.js";
 const subModule = new Module({
   imports: [],
   providers: [Logger],
-  routes: [appRouter],
+  routes: [],
 });
 
 export const appModule = new Module({
   imports: [subModule],
   providers: [],
-  routes: [],
+  routes: [appRouter],
 });
 ```
 
@@ -198,9 +198,6 @@ Dynamic modules allow you to provide dynamic providers that can be asynchronousl
 ```typescript
 Copy code
 import { Module, DynamicModule } from "depsi";
-import { MyClass } from "./myclass.js";
-import { testRouter } from "./test.router.js";
-import { TestService, TestLogger } from "./test.service.js";
 
 class MyClass {
   static TOKEN = "token_of_MyClass";
