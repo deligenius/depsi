@@ -194,7 +194,7 @@ export const appModule = new Module({
 
 Dynamic modules allow you to provide dynamic providers that can be asynchronously resolved.
 
-### Creating a Dynamic Module
+### Creating and using a Dynamic Module
 
 ```typescript
 Copy code
@@ -212,16 +212,32 @@ class MyClass {
   }
 }
 
-export const testModule = new Module({
-imports: [
-  new DynamicModule({
-      token: MyClass.TOKEN,
-      provider: async () => new MyClass(),
-    }),
+export const myModule = new Module({
+  imports: [
+    new DynamicModule({
+        token: MyClass.TOKEN,
+        provider: async () => new MyClass(),
+      }),
   ],
-  routes: [testRouter],
-  providers: [TestService, TestLogger],
+  routes: [],
+  providers: [],
 });
+
+// use it by like this:
+const { Depends } = require("depsi");
+
+router.get(
+  "/",
+  (
+    req,
+    res,
+    next,
+    myclass: MyClass = Depends(MyClass.TOKEN)
+  ) => {
+    myclass.test();
+    res.send("Test route");
+  }
+);
 
 ```
 
@@ -272,4 +288,4 @@ testRouter.get(
 
 # Credits
 
-Contributor: @gjuoun
+Contributors: [Jun Guo @gjuoun](https://github.com/gjuoun)
