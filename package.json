@@ -1,0 +1,31 @@
+{
+  "name": "di",
+  "version": "0.0.1",
+  "description": "",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "express.js",
+    "typescript",
+    "dependency injection"
+  ],
+  "author": "Jun Guo",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/delegenius/di.git"
+  },
+  "license": "MIT",
+  "peerDependencies": {
+    "express": "*"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5",
+    "reflect-metadata": "^0.2.2",
+    "@types/express": "^4.17.21"
+  }
+}
