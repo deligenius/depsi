@@ -11,8 +11,7 @@
 `depsi` is a dependency injection library for Node.js, designed to work seamlessly with Express.js, with TypeScript and JavaScript .
 
 <details>
-
-<summary><h3>Quick Start</h3></summary>
+<summary><h2>Quick Start</h3></summary>
 
 ### Installation
 
