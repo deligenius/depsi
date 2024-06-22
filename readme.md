@@ -15,6 +15,19 @@
 * Supports ESM module.
 * Support both of TypeScript and JavaScript 
 
+## Table of content
+- [Quick Start](#quick-start)
+- [API Usage](#api-usage)
+  - [Module](#module)
+  - [Injectable](#injectable)
+  - [Router](#router)
+  - [Depends](#depends)
+- [Advanced Topics](#advanced-topics)
+  - [Nested Modules](#nested-modules)
+  - [Dynamic Modules](#dynamic-modules)
+  - [JavaScript: JSDoc `@param` for Dependency Injection in class constructor](#javascript-jsdoc-param-for-dependency-injection-in-class-constructor)
+  - [JavaScript: JSDoc `@type` for `DynamicModule` injection in route](#javascript-jsdoc-type-for-dynamicmodule-injection-in-route)
+
 <details>
 <summary><h2>Quick Start</h3></summary>
 
