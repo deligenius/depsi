@@ -1,6 +1,6 @@
 {
   "name": "depsi",
-  "version": "0.0.2a",
+  "version": "0.0.3",
   "description": "",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -21,7 +21,7 @@
   "author": "Jun Guo",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/delegenius/depsi.git"
+    "url": "git+https://github.com/deligenius/depsi.git"
   },
   "license": "MIT",
   "peerDependencies": {
