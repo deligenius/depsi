@@ -38,6 +38,24 @@
 npm install depsi express @types/express
 ```
 
+### Update tscofnig.json
+
+Make sure these options are `true` in your `tsconfig.json` 
+* `experimentalDecorators`
+* `emitDecoratorMetadata`
+
+```json
+{
+  "compilerOptions": {
+    // other options
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  }
+}
+
+```
+
+
 ### Basic Setup
 
 ```typescript
