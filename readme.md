@@ -29,8 +29,8 @@
 - [Usage for Javascript](#usage-for-javascript)
   - [Dependency Injection in class constructor](#dependency-injection-in-class-constructor)
   - [Inject `DynamicModule` in router](#inject-dynamicmodule-in-router)
-<details>
-<summary><h2>Quick Start</h3></summary>
+  <details>
+  <summary><h2>Quick Start</h3></summary>
 
 ### Installation
 
@@ -40,34 +40,35 @@ npm install depsi express @types/express
 
 ### Update tscofnig.json
 
-Make sure these options are `true` in your `tsconfig.json` 
-* `experimentalDecorators`
-* `emitDecoratorMetadata`
+Make sure these options are `true` in your `tsconfig.json`
+
+- `experimentalDecorators`
+- `emitDecoratorMetadata`
 
 ```json
 {
   "compilerOptions": {
-    // other options
+    //... other options
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true
   }
 }
-
 ```
 
-
 ### Basic Setup
+
+You'll need to create 4 files to get started, here is our recommended setup.
 
 ```typescript
 //app.ts
 import express from "express";
-import { appModule } from "./app.module.js";
+import { appModule } from "./app.module.js"; // or "./app.module" if you are using CommonJS
 
 async function main() {
   const app = express();
 
-  const routes = await appModule.register();
-  for (const router of routes) {
+  const routers = await appModule.register();
+  for (const router of routers) {
     app.use(router.prefix, router);
   }
 
@@ -94,9 +95,10 @@ export class Logger {
 ```typescript
 //app.router.ts
 import { Depends, Router, createRouter } from "depsi";
-import { Logger } from "./app.service.js";
+import { Logger } from "./app.service.js"; // or "./app.service" if you are using CommonJS
 
-export const appRouter = createRouter("/");
+// "/" is the prefix of the router
+export const appRouter = createRouter("/"); 
 
 appRouter.get("/hi", (req, res) => {
   res.send("hi");
@@ -111,9 +113,9 @@ appRouter.get("/test", (req, res, next, logger = Depends(Logger)) => {
 
 ```typescript
 //app.module.ts
-import { appRouter } from "./app.router.js";
+import { appRouter } from "./app.router.js"; // or "./app.router" if you are using CommonJS
 import { Module } from "depsi";
-import { Logger } from "./app.service.js";
+import { Logger } from "./app.service.js"; // or "./app.service" if you are using CommonJS
 
 export const appModule = new Module({
   imports: [],
@@ -311,7 +313,7 @@ import { Injectable, Inject } from "depsi";
 export class TestLogger {
   /**
    * Optional type declaration
-   * @param {MyClass} logger 
+   * @param {MyClass} logger
    */
   constructor(@Inejct(Logger.name) logger) {
     logger.log("TestLogger");
