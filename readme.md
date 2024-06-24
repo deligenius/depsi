@@ -276,7 +276,7 @@ import { Inject, Injectable } from "depsi";
 
 @Injectable()
 class Logger {
-  constructor(@Inject(MyClass.TOKEN) myclass) {}
+  constructor(@Inject(MyClass.TOKEN) myclass: MyClass) {}
 }
 ```
 
