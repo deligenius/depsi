@@ -21,15 +21,15 @@ export class Module {
 
   async register(): Promise<Router[]> {
     // Register imported submodules recursively
-    this.imports.forEach(async (submodule) => {
+    for (const submodule of this.imports) {
       const subRoutes = await submodule.register();
       this.routes.push(...subRoutes);
-    });
+    }
 
     // Register providers
-    this.providers.forEach(async (provider) => {
+    for (const provider of this.providers) {
       await Container.auto_register(provider);
-    });
+    }
 
     return this.routes;
   }

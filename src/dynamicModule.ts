@@ -20,9 +20,9 @@ export class DynamicModule {
 
   async register(): Promise<[]> {
     // Register imported submodules recursively
-    this.imports.forEach(async (submodule) => {
+    for (const submodule of this.imports) {
       await submodule.register();
-    });
+    }
 
     // Register provider
     await Container.register(this.token, this.getProvider);
