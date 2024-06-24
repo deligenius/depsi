@@ -1,5 +1,4 @@
 import "reflect-metadata";
-import { getParamsFromJsDoc } from "./util.js";
 import {
   INJECT_TOKEN_METADATA_KEY,
   InjectTokenMetadata,

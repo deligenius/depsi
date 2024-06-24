@@ -9,7 +9,7 @@
 `depsi` is a dependency injection library for Express.js (Node.js), provide progressive way to add super power to your old or new project!
 
 - Progressive DI(Dependency injection) framework for Express.js
-- Super lightweight - 5 kb, or 12.7 kb unpacked
+- Super lightweight - 5 kb
 - Supports ESM module.
 - Support both of TypeScript and JavaScript
 
