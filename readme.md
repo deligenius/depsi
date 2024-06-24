@@ -306,12 +306,10 @@ class Logger {
 
 JavaScript doesn't provide type information in class constructor that allows us to inject in a normal way. Fortunatelly we can inject in by `@Inject(className)`.
 
-In addition, `@Injectable` is not necessary in a pure javascript (vanilla JS without tsconfig.json).
-
 ```javascript
 import { Injectable, Inject } from "depsi";
 
-@Injectable() // can be removed in a vanilla javascript project
+@Injectable() 
 export class TestLogger {
   /**
    * Optional type declaration
@@ -348,6 +346,25 @@ testRouter.get(
   }
 );
 ```
+
+## Usage for Vanilla JavaScript project
+
+For a vanilla javascript project, decorators are not usable, however we can still achive the same by utilizing `Depends` function. 
+
+```ts
+class AppService {
+  constructor(logger = Depends(Logger)) {
+    this.logger = logger;
+  }
+
+  getHello() {
+    this.logger.log("log from AppService.getHello");
+    return "Hello appservice!";
+  }
+}
+```
+
+Other usage are all the same. Please keep in mind this special usage is for vanilla javascript only.
 
 # Credits
 
