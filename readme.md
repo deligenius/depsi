@@ -1,14 +1,12 @@
 # Depsi
 
-> Write beautiful code in your Express.js app with dependency injection
-
 [![TypeScript](https://img.shields.io/badge/--3178C6?logo=typescript&logoColor=ffffff)](https://www.typescriptlang.org/)
 [![Npm package version](https://badgen.net/npm/v/depsi)](https://www.npmjs.com/package/depsi)
 ![npm](https://img.shields.io/npm/dw/depsi)
 ![NPM](https://img.shields.io/npm/l/depsi)
 ![GitHub Repo stars](https://img.shields.io/github/stars/deligenius/depsi?style=social)
 
-`depsi` is a dependency injection library for Node.js, designed to work seamlessly with Express.js, TypeScript or JavaScript.
+`depsi` is a dependency injection library for Express.js (Node.js), provide progressive way to add super power to your old or new project!
 
 - Progressive DI(Dependency injection) framework for Express.js
 - Super lightweight - 5 kb, or 12.7 kb unpacked
