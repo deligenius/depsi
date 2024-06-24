@@ -27,6 +27,8 @@
 - [Usage for Javascript](#usage-for-javascript)
   - [Dependency Injection in class constructor](#dependency-injection-in-class-constructor)
   - [Inject `DynamicModule` in router](#inject-dynamicmodule-in-router)
+  - [Usage for Vanilla JavaScript project](#usage-for-vanilla-javascript-project)
+
 
 <details><summary><h2>Quick Start</h3></summary>
 
