@@ -10,8 +10,8 @@
 
 - Progressive DI(Dependency injection) framework for Express.js
 - Super lightweight - 5 kb
-- Supports ESM module.
-- Support both of TypeScript and JavaScript
+- Supports both of CommonJS and ESM module.
+- Support both of TypeScript and vanilla JavaScript
 
 ## Table of content
 
