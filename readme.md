@@ -27,8 +27,8 @@
 - [Usage for Javascript](#usage-for-javascript)
   - [Dependency Injection in class constructor](#dependency-injection-in-class-constructor)
   - [Inject `DynamicModule` in router](#inject-dynamicmodule-in-router)
-  <details>
-  <summary><h2>Quick Start</h3></summary>
+
+<details><summary><h2>Quick Start</h3></summary>
 
 ### Installation
 
@@ -66,9 +66,9 @@ async function main() {
   const app = express();
 
   const routers = await appModule.register();
-  for (const router of routers) {
+  routers.forEach((router) => {
     app.use(router.prefix, router);
-  }
+  });
 
   app.listen(3000, () => {
     console.log("listen on port 3000");
@@ -96,7 +96,7 @@ import { Depends, Router, createRouter } from "depsi";
 import { Logger } from "./app.service.js"; // or "./app.service" if you are using CommonJS
 
 // "/" is the prefix of the router
-export const appRouter = createRouter("/"); 
+export const appRouter = createRouter("/");
 
 appRouter.get("/hi", (req, res) => {
   res.send("hi");
@@ -210,7 +210,7 @@ appRouter.get("/test", (req, res, next, logger = Depends(Logger)) => {
 
 ## Router
 
-Routers are used to define routes within a module.
+Routers are used to define routes within a module, also depsi's `Router` is compatible with Express.js
 
 ### Creating a Router
 
@@ -224,6 +224,8 @@ appRouter.get("/hi", (req, res) => {
   res.send("hi");
 });
 ```
+
+###
 
 # Advanced Topics
 

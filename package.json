@@ -1,16 +1,29 @@
 {
   "name": "depsi",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "",
-  "main": "dist/index.js",
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "dist/cjs/index.js",
   "files": [
     "./dist"
   ],
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/types/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/types/index.d.ts",
+        "default": "./dist/cjs/index.js"
+      }
+    }
+  },
   "type": "module",
   "scripts": {
-    "build": "tsc",
+    "clean": "rm -rf dist",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build:esm": "tsc -p tsconfig.esm.json",
+    "build": "npm run clean && npm run build:cjs && npm run build:esm",
     "start": "node --no-warnings=ExperimentalWarning --loader ts-node/esm ./src/playground/app.ts",
     "prepublishOnly": "npm run build"
   },
