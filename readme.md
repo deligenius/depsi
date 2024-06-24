@@ -306,10 +306,12 @@ class Logger {
 
 JavaScript doesn't provide type information in class constructor that allows us to inject in a normal way. Fortunatelly we can inject in by `@Inject(className)`.
 
+In addition, `@Injectable` is not necessary in a pure javascript (vanilla JS without tsconfig.json).
+
 ```javascript
 import { Injectable, Inject } from "depsi";
 
-@Injectable()
+@Injectable() // can be removed in a vanilla javascript project
 export class TestLogger {
   /**
    * Optional type declaration
