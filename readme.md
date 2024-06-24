@@ -26,9 +26,9 @@
 - [Advanced Topics](#advanced-topics)
   - [Nested Modules](#nested-modules)
   - [Dynamic Modules](#dynamic-modules)
-  - [JavaScript: JSDoc `@param` for Dependency Injection in class constructor](#javascript-jsdoc-param-for-dependency-injection-in-class-constructor)
-  - [JavaScript: JSDoc `@type` for `DynamicModule` injection in route](#javascript-jsdoc-type-for-dynamicmodule-injection-in-route)
-
+- [Usage for Javascript](#usage-for-javascript)
+  - [Dependency Injection in class constructor](#dependency-injection-in-class-constructor)
+  - [Inject `DynamicModule` in router](#inject-dynamicmodule-in-router)
 <details>
 <summary><h2>Quick Start</h3></summary>
 
@@ -161,6 +161,7 @@ export class Service {
 ```
 
 ### Register providers in a module
+
 The order of providers matters, `depsi` register providers from left to right.
 
 ```ts
@@ -170,7 +171,6 @@ export const appModule = new Module({
   routes: [],
 });
 ```
-
 
 ## Depends
 
@@ -251,47 +251,59 @@ class MyClass {
   }
 }
 
+// register dynamic module
 export const myModule = new Module({
   imports: [
     new DynamicModule({
       token: MyClass.TOKEN,
-      provider: async () => new MyClass(),
+      getProvider: async () => new MyClass(),
     }),
   ],
   routes: [],
   providers: [],
 });
 
-// use it by like this:
+// Use it in router:
 import { Depends } from "depsi";
 
 router.get("/", (req, res, next, myclass: MyClass = Depends(MyClass.TOKEN)) => {
   myclass.test();
   res.send("Test route");
 });
+
+// Use it in class constructor:
+import { Inject, Injectable } from "depsi";
+
+@Injectable()
+class Logger {
+  constructor(@Inject(MyClass.TOKEN) myclass) {}
+}
 ```
 
-## JavaScript: JSDoc `@param` for Dependency Injection in class constructor
+# Usage for JavaScript
 
-You can declare parameter types in JSDoc comments to enable dependency injection in JavaScript.
+## Dependency Injection in class constructor
 
-### JSDoc for Constructor Injection
+JavaScript doesn't provide type information in class constructor that allows us to inject in a normal way. Fortunatelly we can inject in by `@Inject(className)`.
 
 ```javascript
-import { Injectable } from "depsi";
+import { Injectable, Inject } from "depsi";
 
 @Injectable()
 export class TestLogger {
   /**
-   * @param {Logger} logger
+   * Optional type declaration
+   * @param {MyClass} logger 
    */
-  constructor(logger) {
+  constructor(@Inejct(Logger.name) logger) {
     logger.log("TestLogger");
   }
 }
 ```
 
-## JavaScript: JSDoc `@type` for `DynamicModule` injection in route
+## Inject `DynamicModule` in router
+
+We still use `Depends(token)` to inject dynamic module provider, but for your convenience, it's probabally better to add type declaration for it.
 
 ```javascript
 const { createRouter, Depends } = require("depsi");

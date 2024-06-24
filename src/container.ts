@@ -1,5 +1,9 @@
 import "reflect-metadata";
 import { getParamsFromJsDoc } from "./util.js";
+import {
+  INJECT_TOKEN_METADATA_KEY,
+  InjectTokenMetadata,
+} from "./decorators.js";
 
 export type Constructor<T> = new (...args: any[]) => T;
 
@@ -27,23 +31,51 @@ export class Container {
 
   static auto_register<T>(cls: Constructor<T>) {
     type C = Constructor<T>;
+    type ClassParameter = C | string;
 
     if (this._instances.has(cls.name)) {
       return this.resolve(cls);
     }
 
-    let paramTypes: (string | C)[] =
-      Reflect.getMetadata("design:paramtypes", cls) || [];
+    let params: ClassParameter[] | undefined = Reflect.getMetadata(
+      "design:paramtypes",
+      cls
+    );
 
-    if (paramTypes.length > 0 && (paramTypes[0] as C).name === "Object") {
-      // it's a javascript class, try to get the types from JSDoc
-      paramTypes = getParamsFromJsDoc(cls);
+    // if no constructor or parameters, just create the instance
+    if (!params?.length) {
+      return this.register(cls, () => new cls());
     }
 
-    const dependencies = paramTypes.map((dep: Constructor<T> | string) =>
+    const paramsWithToken = this.replaceClassWithToken(cls, params);
+
+    const dependencies = paramsWithToken.map((dep: ClassParameter) =>
       this.resolve(dep)
     );
     return this.register(cls, () => new cls(...dependencies));
+  }
+
+  /** Handle dynamic module's `@Inject`, replace class with token
+   *  so that the `@Inject` class can be resolved from the container
+   */
+  private static replaceClassWithToken<T>(
+    cls: Constructor<T>,
+    paramTypes: (string | Constructor<T>)[]
+  ) {
+    // get the inject metadata (from dynamic modules)
+    const injectMetadata: InjectTokenMetadata[] | undefined =
+      Reflect.getMetadata(INJECT_TOKEN_METADATA_KEY, cls.prototype.constructor);
+
+    // if there are inject metadata, replace the token with the actual class
+    if (injectMetadata?.length) {
+      const newParamTypes = [...paramTypes];
+      injectMetadata.forEach((metadata) => {
+        newParamTypes[metadata.parameterIndex] = metadata.token;
+      });
+      return newParamTypes;
+    } else {
+      return paramTypes;
+    }
   }
 }
 
