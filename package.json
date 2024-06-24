@@ -11,6 +11,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
+    "start": "node --no-warnings=ExperimentalWarning --loader ts-node/esm ./src/playground/app.ts",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
@@ -28,8 +29,9 @@
     "express": "*"
   },
   "devDependencies": {
-    "typescript": "^5.4.5",
+    "@types/express": "^4.17.21",
     "reflect-metadata": "^0.2.2",
-    "@types/express": "^4.17.21"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
   }
 }
