@@ -1,4 +1,4 @@
-import { Constructor, Container } from "./container.js";
+import { Container } from "./container.js";
 import { Module, ModuleOptions } from "./module.js";
 
 export interface DynamicModuleOptions {
