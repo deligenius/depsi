@@ -6,7 +6,7 @@
 ![NPM](https://img.shields.io/npm/l/depsi)
 ![GitHub Repo stars](https://img.shields.io/github/stars/deligenius/depsi?style=social)
 
-`depsi` is a dependency injection library for Express.js (Node.js), provide progressive way to add super power to your old or new project!
+`depsi` is a nest.js like dependency injection library for Express.js (Node.js), provide progressive way to add super power to your old or new project!
 
 - Progressive DI(Dependency injection) framework for Express.js
 - Super lightweight - 5 kb
