@@ -1,8 +1,8 @@
 import "reflect-metadata";
-import { InjectTokenMetadata } from "./decorators.js";
+import { InjectTokenMetadata, Metadata } from "./decorators.js";
 import { getClsKey } from "./util.js";
-import { INJECT_TOKEN_METADATA_KEY } from "./enums.js";
-import { type Constructor } from "./types.js";
+
+export type Constructor<T> = new (...args: any[]) => T;
 
 export class Container {
   static _instances: Map<symbol | string, any> = new Map();
@@ -17,23 +17,18 @@ export class Container {
     return instance;
   }
 
-  static resolve<T>(cls: Constructor<T> | string | symbol): T {
+  static resolve<T>(cls: Constructor<T> | string): T {
     const key = getClsKey(cls);
     const instance = this._instances.get(key);
     if (!instance) {
-      const className =
-        typeof cls === "string"
-          ? cls
-          : typeof cls === "symbol"
-          ? cls.toString()
-          : cls.name;
+      const className = typeof cls === "string" ? cls : cls.name;
       throw new Error(`Instance not found for ${className}`);
     }
     return instance;
   }
 
   static auto_register<T>(cls: Constructor<T>) {
-    type ClassParameter = symbol | string;
+    type ClassParameter = Constructor<T> | string;
 
     const key = getClsKey(cls);
 
@@ -46,7 +41,7 @@ export class Container {
       cls
     );
 
-    // if no constructor or parameters, just create the instance
+    // dif no constructor or parameters, just create the instance
     if (!params?.length) {
       return this.register(cls, () => new cls());
     }
@@ -62,22 +57,27 @@ export class Container {
    */
   private static _handleInjectDecorator<T>(
     cls: Constructor<T>,
-    paramTypes: (string | symbol)[]
+    paramTypes: (string | Constructor<any>)[]
   ) {
     // get the inject metadata (from dynamic modules)
     const injectMetadata: InjectTokenMetadata[] | undefined =
-      Reflect.getMetadata(INJECT_TOKEN_METADATA_KEY, cls.prototype.constructor);
+      Reflect.getMetadata(
+        Metadata.INJECT_TOKEN_METADATA_KEY,
+        cls.prototype.constructor
+      );
 
-    // if there are inject metadata, replace the token with the actual class
-    if (injectMetadata?.length) {
-      const newParamTypes = [...paramTypes];
-      injectMetadata.forEach((metadata) => {
-        newParamTypes[metadata.parameterIndex] = metadata.token;
-      });
-      return newParamTypes;
-    } else {
+    // if no inject metadata, return the original paramTypes
+    if (!injectMetadata?.length) {
       return paramTypes;
     }
+
+    // if there are inject metadata, replace the "Object" with the token (dynamic module token)
+    const newParams = injectMetadata.reduce((acc, metadata) => {
+      acc[metadata.parameterIndex] = metadata.token;
+      return acc;
+    }, paramTypes);
+
+    return newParams;
   }
 }
 
