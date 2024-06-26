@@ -306,7 +306,7 @@ class Logger {
 
 ## Dependency Injection in class constructor
 
-JavaScript doesn't provide type information in class constructor that allows us to inject in a normal way. Fortunatelly we can inject in by `@Inject(className)`.
+JavaScript doesn't provide type information in class constructor that allows us to inject in a normal way. Fortunatelly we can inject in by `@Inject(class)`.
 
 ```javascript
 import { Injectable, Inject } from "depsi";
@@ -315,9 +315,9 @@ import { Injectable, Inject } from "depsi";
 export class TestLogger {
   /**
    * Optional type declaration
-   * @param {MyClass} logger
+   * @param {Logger} logger
    */
-  constructor(@Inejct(Logger.name) logger) {
+  constructor(@Inejct(Logger) logger) {
     logger.log("TestLogger");
   }
 }
@@ -351,9 +351,11 @@ testRouter.get(
 
 ## Usage for Vanilla JavaScript project
 
-For a vanilla javascript project, decorators are not usable, however we can still achive the same by utilizing `Depends` function. 
+For a vanilla javascript project (without `tsconfig.json`), decorators are not usable. however we can still manually mark class with `Injectable`, also get dependency injections in constructor by utilizing `Depends` function. 
 
 ```ts
+const { Injectable, Depends } = require("depsi");
+
 class AppService {
   constructor(logger = Depends(Logger)) {
     this.logger = logger;
@@ -364,6 +366,8 @@ class AppService {
     return "Hello appservice!";
   }
 }
+
+Injectable(AppService)
 ```
 
 Other usage are all the same. Please keep in mind this special usage is for vanilla javascript only.
