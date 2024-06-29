@@ -17,7 +17,7 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
 
-    "types": ["reflect-metadata", "express"]
+    "types": ["reflect-metadata", "express", "node"]
   },
   "ts-node": {
     "transpileOnly": true,
