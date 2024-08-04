@@ -9,25 +9,40 @@ function isConstructor(cls: any): cls is Constructor<any> {
 export class Container {
   private _instanceMap: Map<Token, any>
 
+  private static globalMap = new Map<Token, any>();
+
   constructor() {
     this._instanceMap = new Map();
   }
 
   public async registerProvider<T>(
-    {token, useValue}: Provider<T>
+    {token, useValue, isGlobal = false}: Provider<T>
   ) {
-    // avoid duplicate registration
+    //region avoid duplicate registration
+    if(Container.globalMap.has(token)) {
+      return Container.globalMap.get(token);
+    }
+    
     if(this._instanceMap.has(token)) {
       return this._instanceMap.get(token);
     }
 
+    //region register provider
+
     const value = typeof useValue === "function" ? await useValue() : useValue;
-    
-    this._instanceMap.set(token, value);
+    if(isGlobal) {
+      Container.globalMap.set(token, value);
+    }else{
+      this._instanceMap.set(token, value);
+    }
     return value;
   }
 
   public resolveToken<T>(token: Token<T>): T {
+    if(Container.globalMap.has(token)) {
+      return Container.globalMap.get(token);
+    }
+
     if (!this._instanceMap.has(token)) {
       const className = typeof token === "string" ?  token : token.name;
       throw new Error(`Instance not found for ${className}`);

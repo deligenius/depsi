@@ -47,7 +47,7 @@ export class Module {
     }
   }
 
-  public resolve<T>(token: Token<T>): Token<T> extends string ? any : T
+  public resolve<T>(token: Token<T>): Token<T> extends string ? any : T 
   {
     return this.container.resolveToken(token);
   }
