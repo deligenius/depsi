@@ -1,5 +1,6 @@
 import "reflect-metadata";
 import { Constructor, ModuleProvider, Provider, Token } from "./type.js";
+import { InjectTokenMetadata, Metadata } from "./decorators.js";
 
 function isConstructor(cls: any): cls is Constructor<any> {
   return typeof cls === "function" 
@@ -69,9 +70,12 @@ export class Container {
         useValue: new token()
       });
     }
+    // replace @Inject() with the actual instance
+    const paramsWithInstance = this._handleInjectDecorator(token, params)
+
 
     // TODO: resolve class
-    const dependencies = params.map((dependency) => this.resolveToken(dependency));
+    const dependencies = paramsWithInstance.map((dependency) => this.resolveToken(dependency));
     return this.registerProvider({
       token,
       useValue: new token(...dependencies)
@@ -82,30 +86,30 @@ export class Container {
   /** Handle dynamic module's `@Inject`, replace class with token
    *  so that the `@Inject` class can be resolved from the container
    */
-  // private _handleInjectDecorator<T>(
-  //   cls: Constructor<T>,
-  //   paramTypes: (string | Constructor<any>)[]
-  // ) {
-  //   // get the inject metadata (from dynamic modules)
-  //   const injectMetadata: InjectTokenMetadata[] | undefined =
-  //     Reflect.getMetadata(
-  //       Metadata.INJECT_TOKEN_METADATA_KEY,
-  //       cls.prototype.constructor
-  //     );
+  private _handleInjectDecorator<T>(
+    cls: Constructor<T>,
+    paramTypes: (string | Constructor<any>)[]
+  ) {
+    // get the inject metadata (from dynamic modules)
+    const injectMetadata: InjectTokenMetadata[] | undefined =
+      Reflect.getMetadata(
+        Metadata.INJECT_TOKEN_METADATA_KEY,
+        cls.prototype.constructor
+      );
 
-  //   // if no inject metadata, return the original paramTypes
-  //   if (!injectMetadata?.length) {
-  //     return paramTypes;
-  //   }
+    // if no inject metadata, return the original paramTypes
+    if (!injectMetadata?.length) {
+      return paramTypes;
+    }
 
-  //   // if there are inject metadata, replace the "Object" with the token (dynamic module token)
-  //   const newParams = injectMetadata.reduce((acc, metadata) => {
-  //     acc[metadata.parameterIndex] = metadata.token;
-  //     return acc;
-  //   }, paramTypes);
+    // if there are inject metadata, replace the "Object" with the token (dynamic module token)
+    const newParams = injectMetadata.reduce((acc, metadata) => {
+      acc[metadata.parameterIndex] = metadata.token;
+      return acc;
+    }, paramTypes);
 
-  //   return newParams;
-  // }
+    return newParams;
+  }
 }
 
 // export function Depends<T>(cls: Constructor<T> | string) {
