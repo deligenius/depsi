@@ -14,6 +14,10 @@ export const Metadata =  {
 //   );
 // };
 
+export type InjectableMetadata = {
+  injectable: boolean;
+};
+
 // region @Injectable
 export function Injectable(jsClass?: Constructor<any>) {
   
@@ -27,7 +31,7 @@ export function Injectable(jsClass?: Constructor<any>) {
       Metadata.INJECTABLE_METADATA_KEY,
       {
         injectable: true
-      },
+      } satisfies InjectableMetadata,
       target
     );
   };

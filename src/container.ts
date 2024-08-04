@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { Constructor, ModuleProvider, Provider, Token } from "./type.js";
-import { InjectTokenMetadata, Metadata } from "./decorators.js";
+import { InjectableMetadata, InjectTokenMetadata, Metadata } from "./decorators.js";
 
 function isConstructor(cls: any): cls is Constructor<any> {
   return typeof cls === "function" 
@@ -57,6 +57,11 @@ export class Container {
     // endregion string token
 
     //region class token
+    // determin if the class token is @Injectable()
+    if(!this._isInjectable(token)) {
+      throw new Error(`Class ${token.name} is not injectable`);
+    }
+
     let params: Token[] | undefined = Reflect.getMetadata(
       "design:paramtypes",
       token
@@ -73,14 +78,29 @@ export class Container {
     // replace @Inject() with the actual instance
     const paramsWithInstance = this._handleInjectDecorator(token, params)
 
-
-    // TODO: resolve class
     const dependencies = paramsWithInstance.map((dependency) => this.resolveToken(dependency));
     return this.registerProvider({
       token,
       useValue: new token(...dependencies)
     });
     // endregion class token
+  }
+
+  private _isInjectable(token: Constructor<any>) {
+    // JS class
+    const isJsClass = token.prototype.hasOwnProperty(Metadata.INJECTABLE_METADATA_KEY);
+
+    if(isJsClass) {
+      const metadata: InjectableMetadata = token.prototype[Metadata.INJECTABLE_METADATA_KEY];
+      return metadata.injectable;
+    }
+    // TS class
+    else if(Reflect.getMetadata(Metadata.INJECTABLE_METADATA_KEY, token)) {
+      const metadata: InjectableMetadata = Reflect.getMetadata(Metadata.INJECTABLE_METADATA_KEY, token);
+      return metadata.injectable;
+    }else{
+      return false;
+    }
   }
 
   /** Handle dynamic module's `@Inject`, replace class with token
