@@ -77,7 +77,7 @@ export class Container {
         return this.registerProvider({ token, useValue: provider.useValue });
       }
       throw new Error(
-        `Cannot resolve token: ${token}, please provide a useValue`
+        `Cannot resolve token: [${token}], please provide a useValue`
       );
     }
     // endregion string token
@@ -85,7 +85,7 @@ export class Container {
     //region class token
     // determin if the class token is @Injectable()
     if (!this._isInjectable(token)) {
-      throw new Error(`Class ${token.name} is not injectable`);
+      throw new Error(`Class [${token.name}] is not injectable`);
     }
 
     let params: Token[] | undefined = Reflect.getMetadata(

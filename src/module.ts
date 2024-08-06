@@ -1,6 +1,7 @@
 import { Container } from "./container.js";
 import { Router } from "./router.js";
 import { ModuleProvider, Token } from "./type.js";
+import type { Express } from "express";
 
 export interface ModuleOptions {
   providers?: ModuleProvider[];
@@ -51,4 +52,14 @@ export class Module {
   public resolve<T>(token: Token<T>): Token<T> extends string ? any : T {
     return this.container.resolveToken(token);
   }
+}
+
+export async function initializeModule(app: Express, rootModule: Module) {
+  const { routes } = await rootModule.register();
+
+  routes.forEach((route) => {
+    app.use(route.prefix, route);
+  });
+
+  return app;
 }

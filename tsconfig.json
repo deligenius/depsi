@@ -24,5 +24,5 @@
     "esm": true
   },
   "include": ["src/**/*"],
-  "exclude": ["src/playground*"]
+  // "exclude": ["src/playground*"]
 }

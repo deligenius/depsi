@@ -24,7 +24,6 @@
     "build:cjs": "tsc -p tsconfig.cjs.json && cp package.cjs.json dist/cjs/package.json",
     "build:esm": "tsc -p tsconfig.esm.json",
     "build": "npm run clean && npm run build:cjs && npm run build:esm",
-    "start": "node --no-warnings=ExperimentalWarning --loader ts-node/esm ./src/playground/app.ts",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
@@ -46,7 +45,6 @@
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
-    "ts-node": "^10.9.2",
     "typescript": "^5.4.5"
   }
 }
