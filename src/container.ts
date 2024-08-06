@@ -1,61 +1,146 @@
 import "reflect-metadata";
-import { InjectTokenMetadata, Metadata } from "./decorators.js";
-import { getClsKey } from "./util.js";
+import { Constructor, ModuleProvider, Provider, Token } from "./type.js";
+import {
+  InjectableMetadata,
+  InjectTokenMetadata,
+  Metadata,
+} from "./decorators.js";
 
-export type Constructor<T> = new (...args: any[]) => T;
+function isConstructor(cls: any): cls is Constructor<any> {
+  return typeof cls === "function";
+}
 
 export class Container {
-  static _instances: Map<symbol | string, any> = new Map();
+  private _instanceMap: Map<Token, any>;
 
-  static async register<T>(
-    cls: Constructor<T> | string,
-    callback: () => T | Promise<T>
-  ) {
-    const key = getClsKey(cls);
-    const instance = await callback();
-    this._instances.set(key, instance);
-    return instance;
+  private static globalMap = new Map<Token, any>();
+
+  constructor() {
+    this._instanceMap = new Map();
   }
 
-  static resolve<T>(cls: Constructor<T> | string): T {
-    const key = getClsKey(cls);
-    const instance = this._instances.get(key);
-    if (!instance) {
-      const className = typeof cls === "string" ? cls : cls.name;
+  public async registerProvider<T>({
+    token,
+    useValue,
+    isGlobal = false,
+  }: Provider<T>) {
+    //region avoid duplicate registration
+    if (Container.globalMap.has(token)) {
+      return Container.globalMap.get(token);
+    }
+
+    if (this._instanceMap.has(token)) {
+      return this._instanceMap.get(token);
+    }
+
+    //region register provider
+
+    const value = typeof useValue === "function" ? await useValue() : useValue;
+    if (isGlobal) {
+      Container.globalMap.set(token, value);
+    } else {
+      this._instanceMap.set(token, value);
+    }
+    return value;
+  }
+
+  public resolveToken<T>(token: Token<T>): T {
+    if (Container.globalMap.has(token)) {
+      return Container.globalMap.get(token);
+    }
+
+    if (!this._instanceMap.has(token)) {
+      const className = typeof token === "string" ? token : token.name;
       throw new Error(`Instance not found for ${className}`);
     }
-    return instance;
+    return this._instanceMap.get(token);
   }
 
-  static auto_register<T>(cls: Constructor<T>) {
-    type ClassParameter = Constructor<T> | string;
+  public mergeContainer(container: Container) {
+    this._instanceMap = new Map([
+      ...this._instanceMap,
+      ...container._instanceMap,
+    ]);
+    return this._instanceMap;
+  }
 
-    const key = getClsKey(cls);
+  public auto_register<T>(provider: ModuleProvider<T>) {
+    const token = isConstructor(provider) ? provider : provider.token;
 
-    if (this._instances.has(key)) {
-      return this._instances.get(key);
+    if (this._instanceMap.has(token)) {
+      return this._instanceMap.get(token);
+    }
+    // region string token
+    //? string token, it's a custom provider, {token: 'custom', useValue: 'customValue'}
+    if (typeof token === "string") {
+      if ("useValue" in provider) {
+        return this.registerProvider({ token, useValue: provider.useValue });
+      }
+      throw new Error(
+        `Cannot resolve token: ${token}, please provide a useValue`
+      );
+    }
+    // endregion string token
+
+    //region class token
+    // determin if the class token is @Injectable()
+    if (!this._isInjectable(token)) {
+      throw new Error(`Class ${token.name} is not injectable`);
     }
 
-    let params: ClassParameter[] | undefined = Reflect.getMetadata(
+    let params: Token[] | undefined = Reflect.getMetadata(
       "design:paramtypes",
-      cls
+      token
     );
 
-    // dif no constructor or parameters, just create the instance
+    // No parameters, just create the instance with class constructor
     if (!params?.length) {
-      return this.register(cls, () => new cls());
+      // {token: Class, useValue: new Class()}
+      return this.registerProvider({
+        token,
+        useValue: new token(),
+      });
     }
+    // replace @Inject() with the actual instance
+    const paramsWithInstance = this._handleInjectDecorator(token, params);
 
-    const paramsWithToken = this._handleInjectDecorator(cls, params);
+    const dependencies = paramsWithInstance.map((dependency) =>
+      this.resolveToken(dependency)
+    );
+    return this.registerProvider({
+      token,
+      useValue: new token(...dependencies),
+    });
+    // endregion class token
+  }
 
-    const dependencies = paramsWithToken.map((dep) => this.resolve(dep));
-    return this.register(cls, () => new cls(...dependencies));
+  private _isInjectable(token: Constructor<any>) {
+    // JS class
+    const isJsClass = token.prototype.hasOwnProperty(
+      Metadata.INJECTABLE_METADATA_KEY
+    );
+
+    if (isJsClass) {
+      const metadata: InjectableMetadata =
+        token.prototype[Metadata.INJECTABLE_METADATA_KEY];
+      return metadata.injectable;
+    }
+    // TS class
+    else if (Reflect.getMetadata(Metadata.INJECTABLE_METADATA_KEY, token)) {
+      const metadata: InjectableMetadata = Reflect.getMetadata(
+        Metadata.INJECTABLE_METADATA_KEY,
+        token
+      );
+      return metadata.injectable;
+    } else {
+      return false;
+    }
   }
 
   /** Handle dynamic module's `@Inject`, replace class with token
    *  so that the `@Inject` class can be resolved from the container
    */
-  private static _handleInjectDecorator<T>(
+  private _handleInjectDecorator<T>(
     cls: Constructor<T>,
     paramTypes: (string | Constructor<any>)[]
   ) {
@@ -79,8 +164,4 @@ export class Container {
 
     return newParams;
   }
-}
-
-export function Depends<T>(cls: Constructor<T> | string) {
-  return Container.resolve(cls);
 }

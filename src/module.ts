@@ -1,40 +1,54 @@
-import { Constructor, Container } from "./container.js";
-import { DynamicModule } from "./dynamicModule.js";
+import { Container } from "./container.js";
 import { Router } from "./router.js";
+import { ModuleProvider, Token } from "./type.js";
 
 export interface ModuleOptions {
-  providers?: Constructor<any>[];
-  imports?: (Module | DynamicModule)[];
+  providers?: ModuleProvider[];
+  imports?: Module[];
   routes?: Router[];
 }
 
 export class Module {
-  private providers: Constructor<any>[];
-  private imports: (Module | DynamicModule)[];
+  private providers: ModuleProvider<any>[];
+  private imports: Module[];
   private routes: Router[];
+  private container: Container;
 
   constructor({ providers = [], imports = [], routes = [] }: ModuleOptions) {
     this.providers = providers;
     this.imports = imports;
     this.routes = routes;
+    this.container = new Container();
   }
 
-  async register(): Promise<Router[]> {
+  public async register(): Promise<{
+    routes: Router[];
+    container: Container;
+  }> {
     // Register imported submodules recursively
     for (const submodule of this.imports) {
-      const subRoutes = await submodule.register();
+      // need to get subRoutes and also register providers
+      const { routes: subRoutes, container: subContainer } =
+        await submodule.register();
+
       this.routes.push(...subRoutes);
+
+      // bring instance from subContainer to this container
+      this.container.mergeContainer(subContainer);
     }
 
     // Register providers
     for (const provider of this.providers) {
-      await Container.auto_register(provider);
+      await this.container.auto_register(provider);
     }
 
-    return this.routes;
+    return {
+      routes: this.routes,
+      container: this.container,
+    };
   }
 
-  resolve<T>(cls: Constructor<T> | string): T {
-    return Container.resolve(cls);
+  public resolve<T>(token: Token<T>): Token<T> extends string ? any : T {
+    return this.container.resolveToken(token);
   }
 }
