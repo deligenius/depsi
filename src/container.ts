@@ -19,15 +19,11 @@ export class Container {
     this._instanceMap = new Map();
   }
 
-  public async registerProvider<T>({
-    token,
-    useValue,
-    isGlobal = false,
-  }: Provider<T>) {
+  public async registerProvider<T>({ token, useValue }: Provider<T>) {
     //region avoid duplicate registration
-    if (Container.globalMap.has(token)) {
-      return Container.globalMap.get(token);
-    }
+    // if (Container.globalMap.has(token)) {
+    //   return Container.globalMap.get(token);
+    // }
 
     if (this._instanceMap.has(token)) {
       return this._instanceMap.get(token);
@@ -36,11 +32,11 @@ export class Container {
     //region register provider
 
     const value = typeof useValue === "function" ? await useValue() : useValue;
-    if (isGlobal) {
-      Container.globalMap.set(token, value);
-    } else {
-      this._instanceMap.set(token, value);
-    }
+    // if (isGlobal) {
+    //   Container.globalMap.set(token, value);
+    // } else {
+    // }
+    this._instanceMap.set(token, value);
     return value;
   }
 
@@ -77,7 +73,7 @@ export class Container {
         return this.registerProvider({ token, useValue: provider.useValue });
       }
       throw new Error(
-        `Cannot resolve token: [${token}], please provide a useValue`
+        `Cannot resolve token: [${token}], please provide a useValue`,
       );
     }
     // endregion string token
@@ -90,7 +86,7 @@ export class Container {
 
     let params: Token[] | undefined = Reflect.getMetadata(
       "design:paramtypes",
-      token
+      token,
     );
 
     // No parameters, just create the instance with class constructor
@@ -105,7 +101,7 @@ export class Container {
     const paramsWithInstance = this._handleInjectDecorator(token, params);
 
     const dependencies = paramsWithInstance.map((dependency) =>
-      this.resolveToken(dependency)
+      this.resolveToken(dependency),
     );
     return this.registerProvider({
       token,
@@ -117,7 +113,7 @@ export class Container {
   private _isInjectable(token: Constructor<any>) {
     // JS class
     const isJsClass = token.prototype.hasOwnProperty(
-      Metadata.INJECTABLE_METADATA_KEY
+      Metadata.INJECTABLE_METADATA_KEY,
     );
 
     if (isJsClass) {
@@ -129,7 +125,7 @@ export class Container {
     else if (Reflect.getMetadata(Metadata.INJECTABLE_METADATA_KEY, token)) {
       const metadata: InjectableMetadata = Reflect.getMetadata(
         Metadata.INJECTABLE_METADATA_KEY,
-        token
+        token,
       );
       return metadata.injectable;
     } else {
@@ -142,13 +138,13 @@ export class Container {
    */
   private _handleInjectDecorator<T>(
     cls: Constructor<T>,
-    paramTypes: (string | Constructor<any>)[]
+    paramTypes: (string | Constructor<any>)[],
   ) {
     // get the inject metadata (from dynamic modules)
     const injectMetadata: InjectTokenMetadata[] | undefined =
       Reflect.getMetadata(
         Metadata.INJECT_TOKEN_METADATA_KEY,
-        cls.prototype.constructor
+        cls.prototype.constructor,
       );
 
     // if no inject metadata, return the original paramTypes

@@ -30,11 +30,11 @@ export function Injectable(jsClass?: Constructor<any>) {
 
 //region @Inject, for Javascript
 export type InjectTokenMetadata = {
-  token: Token;
+  token: Exclude<Token, FunctionType<any>>;
   parameterIndex: number;
 };
 
-export function Inject(token: Token<any>) {
+export function Inject(token: Exclude<Token, FunctionType<any>>) {
   return function (
     target: any,
     propertyKey: undefined,
