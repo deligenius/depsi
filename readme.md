@@ -29,7 +29,6 @@
   - [Inject `DynamicModule` in router](#inject-dynamicmodule-in-router)
   - [Usage for Vanilla JavaScript project](#usage-for-vanilla-javascript-project)
 
-
 <details><summary><h2>Quick Start</h3></summary>
 
 ### Installation
@@ -60,23 +59,20 @@ Make sure these options are `true` in your `tsconfig.json`
 You'll need to create 4 files to get started, here is our recommended setup.
 
 ```typescript
-//app.ts
+// app.ts
 import express from "express";
-import { appModule } from "./app.module.js"; // or "./app.module" if you are using CommonJS
+import { initializeModule } from "depsi";
+import { appModule } from "./app.module.js";
 
 async function main() {
   const app = express();
 
-  const routers = await appModule.register();
-  routers.forEach((router) => {
-    app.use(router.prefix, router);
-  });
+  initializeModule(app, appModule);
 
   app.listen(3000, () => {
-    console.log("listen on port 3000");
+    console.log("Server is running on port 3000");
   });
 }
-
 main();
 ```
 
@@ -94,8 +90,9 @@ export class Logger {
 
 ```typescript
 //app.router.ts
-import { Depends, Router, createRouter } from "depsi";
+import { createRouter } from "depsi";
 import { Logger } from "./app.service.js"; // or "./app.service" if you are using CommonJS
+import { appModule } from "./app.module.js";
 
 // "/" is the prefix of the router
 export const appRouter = createRouter("/");
@@ -104,7 +101,9 @@ appRouter.get("/hi", (req, res) => {
   res.send("hi");
 });
 
-appRouter.get("/test", (req, res, next, logger = Depends(Logger)) => {
+appRouter.get("/test", (req, res, next) => {
+  // we can resolve the Logger service from the appModule
+  const logger = appModule.resolve(Logger);
   logger.log("log from /test");
 
   res.send("hello world from /test");
@@ -126,7 +125,8 @@ export const appModule = new Module({
 
 ### You're good to go
 
-now run your app and `curl localhost:3000/test` to see the magic!
+Now, run your app and see your log by hitting
+`curl localhost:3000/test`
 
 </details>
 
@@ -182,6 +182,8 @@ export class Service {
 
 ### Register providers in a module
 
+`Injectable` class shoule be registered in a module always.
+
 The order of providers matters, `depsi` register providers from left to right.
 
 ```ts
@@ -192,19 +194,21 @@ export const appModule = new Module({
 });
 ```
 
-## Depends
+## Resolve Class Instance
 
-The Depends function is used to inject dependencies into route handlers.
+The `module.resolve` function is used to resolve and get the instance for any `Injectable` class.
 
 ### Using Depends in a Route
 
 ```typescript
 import { createRouter, Depends } from "depsi";
 import { Logger } from "./app.service.js";
+import { appModule } from "./app.module.js";
 
 const appRouter = createRouter("/");
 
-appRouter.get("/test", (req, res, next, logger = Depends(Logger)) => {
+appRouter.get("/test", (req, res, next) => {
+  const logger = appModule.resolve(Logger);
   logger.log("log from /test");
   res.send("hello world from /test");
 });
@@ -212,7 +216,7 @@ appRouter.get("/test", (req, res, next, logger = Depends(Logger)) => {
 
 ## Router
 
-Routers are used to define routes within a module, also depsi's `Router` is compatible with Express.js
+Routers are used to define routes within a module, also depsi's `Router` is compatible with Express.js.
 
 ### Creating a Router
 
@@ -220,7 +224,7 @@ Routers are used to define routes within a module, also depsi's `Router` is comp
 import { createRouter, Depends } from "depsi";
 import { Logger } from "./app.service.js";
 
-export const appRouter = createRouter("/");
+export const appRouter = createRouter("/"); // define the prefix for the router
 
 appRouter.get("/hi", (req, res) => {
   res.send("hi");
@@ -255,54 +259,20 @@ export const appModule = new Module({
 });
 ```
 
-## Dynamic Modules
+# Usage for JavaScript
 
-Dynamic modules allow you to provide dynamic providers that can be asynchronously resolved.
-
-### Creating and using a Dynamic Module
-
-```typescript
-import { Module, DynamicModule } from "depsi";
-
-class MyClass {
-  static TOKEN = "token_of_MyClass";
-  constructor() {}
-
-  test() {
-    console.log("Test in MyClass");
+> If you have JS code mixed with TS code, this is the guide for it.
+> Make sure you have these in the `tsconfig.json`
+```json
+{
+  "compilerOptions": {
+    //... other options
+    "allowJs": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   }
 }
-
-// register dynamic module
-export const myModule = new Module({
-  imports: [
-    new DynamicModule({
-      token: MyClass.TOKEN,
-      getProvider: async () => new MyClass(),
-    }),
-  ],
-  routes: [],
-  providers: [],
-});
-
-// Use it in router:
-import { Depends } from "depsi";
-
-router.get("/", (req, res, next, myclass: MyClass = Depends(MyClass.TOKEN)) => {
-  myclass.test();
-  res.send("Test route");
-});
-
-// Use it in class constructor:
-import { Inject, Injectable } from "depsi";
-
-@Injectable()
-class Logger {
-  constructor(@Inject(MyClass.TOKEN) myclass: MyClass) {}
-}
 ```
-
-# Usage for JavaScript
 
 ## Dependency Injection in class constructor
 
@@ -311,7 +281,7 @@ JavaScript doesn't provide type information in class constructor that allows us 
 ```javascript
 import { Injectable, Inject } from "depsi";
 
-@Injectable() 
+@Injectable()
 export class TestLogger {
   /**
    * Optional type declaration
@@ -321,53 +291,6 @@ export class TestLogger {
     logger.log("TestLogger");
   }
 }
-```
-
-## Inject `DynamicModule` in router
-
-We still use `Depends(token)` to inject dynamic module provider, but for your convenience, it's probabally better to add type declaration for it.
-
-```javascript
-const { createRouter, Depends } = require("depsi");
-const { Logger } = require("./app.service.js");
-
-const testRouter = createRouter("/");
-
-testRouter.get(
-  "/",
-  (
-    req,
-    res,
-    next,
-    logger = Depends(Logger),
-    /** @type {MyClass} */
-    myclass = Depends(MyClass.TOKEN)
-  ) => {
-    myclass.test();
-    res.send("Test route");
-  }
-);
-```
-
-## Usage for Vanilla JavaScript project
-
-For a vanilla javascript project (without `tsconfig.json`), decorators are not usable. however we can still manually mark class with `Injectable`, also get dependency injections in constructor by utilizing `Depends` function. 
-
-```ts
-const { Injectable, Depends } = require("depsi");
-
-class AppService {
-  constructor(logger = Depends(Logger)) {
-    this.logger = logger;
-  }
-
-  getHello() {
-    this.logger.log("log from AppService.getHello");
-    return "Hello appservice!";
-  }
-}
-
-Injectable(AppService)
 ```
 
 Other usage are all the same. Please keep in mind this special usage is for vanilla javascript only.

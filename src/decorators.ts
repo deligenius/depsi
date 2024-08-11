@@ -23,22 +23,22 @@ export function Injectable(jsClass?: Constructor<any>) {
       {
         injectable: true,
       } satisfies InjectableMetadata,
-      target
+      target,
     );
   };
 }
 
 //region @Inject, for Javascript
 export type InjectTokenMetadata = {
-  token: Exclude<Token, FunctionType<any>>;
+  token: Token<any>;
   parameterIndex: number;
 };
 
-export function Inject(token: Exclude<Token, FunctionType<any>>) {
+export function Inject(token: Token<any>) {
   return function (
     target: any,
     propertyKey: undefined,
-    parameterIndex: number
+    parameterIndex: number,
   ) {
     const existingMetadata: InjectTokenMetadata[] =
       Reflect.getMetadata(Metadata.INJECT_TOKEN_METADATA_KEY, target) || [];
@@ -47,7 +47,7 @@ export function Inject(token: Exclude<Token, FunctionType<any>>) {
     Reflect.defineMetadata(
       Metadata.INJECT_TOKEN_METADATA_KEY,
       existingMetadata,
-      target
+      target,
     );
   };
 }
