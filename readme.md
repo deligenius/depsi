@@ -9,9 +9,9 @@
 `depsi` is a nest.js like dependency injection library for Express.js (Node.js), provide progressive way to add super power to your old or new project!
 
 - Progressive DI(Dependency injection) framework for Express.js
-- Super lightweight - 5 kb
+- Super lightweight - (8 kb source code)
 - Supports both of CommonJS and ESM module.
-- Support both of TypeScript and vanilla JavaScript
+- Support both of TypeScript and JavaScript (w/ tsconfig.json)
 
 ## Table of content
 
