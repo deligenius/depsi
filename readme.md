@@ -263,6 +263,7 @@ export const appModule = new Module({
 
 > If you have JS code mixed with TS code, this is the guide for it.
 > Make sure you have these in the `tsconfig.json`
+
 ```json
 {
   "compilerOptions": {
