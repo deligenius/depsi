@@ -1,12 +1,12 @@
-import { Router as _Router, RouterOptions } from "express";
+import { type RouterOptions, Router as _Router } from "express";
 
 export interface Router extends _Router {
-  prefix: string;
+	prefix: string;
 }
 
 export function createRouter(prefix: string, options?: RouterOptions) {
-  const router = _Router(options) as Router;
-  router.prefix = prefix;
+	const router = _Router(options) as Router;
+	router.prefix = prefix;
 
-  return router;
+	return router;
 }
