@@ -35,7 +35,7 @@
 npm install depsi express @types/express
 ```
 
-### Update tscofnig.json
+### Update tsconfig.json
 
 Make sure these options are `true` in your `tsconfig.json`
 
